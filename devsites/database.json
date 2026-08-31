@@ -1,0 +1,139 @@
+{
+  "workspaces": [
+    { "id": "sites", "name": "Sites" }
+  ],
+  "companies": [
+    { "id": "brindang", "name": "Brindang" },
+    { "id": "deasil", "name": "Deasil Group" },
+    { "id": "evan", "name": "Evan Luebbe" },
+    { "id": "marco", "name": "Marco Luna Wellness" },
+    { "id": "mbg", "name": "MBG Finance" },
+    { "id": "pamelarasey", "name": "Pamela Rasey" },
+    { "id": "studio", "name": "Studio Mock" },
+    { "id": "thomaspiche", "name": "Thomas Piche" },
+    { "id": "tnc", "name": "TNC" }
+  ],
+  "projects": [
+    {
+      "id": "brindang",
+      "workspace": "sites",
+      "company": "brindang",
+      "project": "brindang",
+      "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/brindang",
+      "githubRepo": "https://github.com/vguyaux/sites/tree/main/brindang",
+      "dev": "",
+      "staging": "https://vguyaux.github.io/sites/brindang/",
+      "prod": "https://vguyaux.github.io/sites/brindang/"
+    },
+    {
+      "id": "deasil",
+      "workspace": "sites",
+      "company": "deasil",
+      "project": "deasil",
+      "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/deasil",
+      "githubRepo": "https://github.com/vguyaux/sites/tree/main/deasil",
+      "dev": "file:///Users/vincentguyaux/Documents/github/sites/deasil/index.html",
+      "staging": "https://vguyaux.github.io/sites/deasil/",
+      "prod": "https://deasilgroup.com"
+    },
+    {
+      "id": "evan",
+      "workspace": "sites",
+      "company": "evan",
+      "project": "evan",
+      "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/evan",
+      "githubRepo": "https://github.com/vguyaux/sites/tree/main/evan",
+      "dev": "file:///Users/vincentguyaux/Documents/github/sites/evan/index.html",
+      "staging": "https://vguyaux.github.io/sites/evan/",
+      "prod": "https://evanluebbe.com"
+    },
+    {
+      "id": "evan-redirect",
+      "workspace": "sites",
+      "company": "evan",
+      "project": "evan-redirect",
+      "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/evan-redirect",
+      "githubRepo": "https://github.com/vguyaux/sites/tree/main/evan-redirect",
+      "dev": "file:///Users/vincentguyaux/Documents/github/sites/evan-redirect/wrangler.jsonc",
+      "staging": "https://github.com/vguyaux/sites/tree/main/evan-redirect",
+      "prod": "https://evanluebbe.com"
+    },
+    {
+      "id": "marco-luna-wellness",
+      "workspace": "sites",
+      "company": "marco",
+      "project": "marco-luna-wellness",
+      "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/marco-luna-wellness",
+      "githubRepo": "https://github.com/vguyaux/sites/tree/main/marco-luna-wellness",
+      "dev": "file:///Users/vincentguyaux/Documents/github/sites/marco-luna-wellness/index.html",
+      "staging": "https://vguyaux.github.io/sites/marco-luna-wellness/",
+      "prod": "https://vguyaux.github.io/sites/marco-luna-wellness/"
+    },
+    {
+      "id": "mbg-finance",
+      "workspace": "sites",
+      "company": "mbg",
+      "project": "mbg-finance",
+      "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/mbg-finance",
+      "githubRepo": "https://github.com/vguyaux/sites/tree/main/mbg-finance",
+      "dev": "",
+      "staging": "https://vguyaux.github.io/sites/mbg-finance/",
+      "prod": "https://vguyaux.github.io/sites/mbg-finance/"
+    },
+    {
+      "id": "pamelarasey",
+      "workspace": "sites",
+      "company": "pamelarasey",
+      "project": "pamelarasey",
+      "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/pamelarasey",
+      "githubRepo": "https://github.com/vguyaux/pamelarasey",
+      "dev": "file:///Users/vincentguyaux/Documents/github/sites/pamelarasey/index.html",
+      "staging": "https://vguyaux.github.io/pamelarasey/",
+      "prod": "https://vguyaux.github.io/pamelarasey/"
+    },
+    {
+      "id": "rasey-redirect",
+      "workspace": "sites",
+      "company": "pamelarasey",
+      "project": "rasey-redirect",
+      "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/rasey-redirect",
+      "githubRepo": "https://github.com/vguyaux/sites/tree/main/rasey-redirect",
+      "dev": "file:///Users/vincentguyaux/Documents/github/sites/rasey-redirect/wrangler.jsonc",
+      "staging": "https://github.com/vguyaux/sites/tree/main/rasey-redirect",
+      "prod": "https://github.com/vguyaux/sites/tree/main/rasey-redirect"
+    },
+    {
+      "id": "studio-mock-1",
+      "workspace": "sites",
+      "company": "studio",
+      "project": "studio-mock-1",
+      "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/studio-mock-1",
+      "githubRepo": "https://github.com/vguyaux/sites/tree/main/studio-mock-1",
+      "dev": "",
+      "staging": "https://vguyaux.github.io/sites/studio-mock-1/",
+      "prod": "https://vguyaux.github.io/sites/studio-mock-1/"
+    },
+    {
+      "id": "thomaspiche",
+      "workspace": "sites",
+      "company": "thomaspiche",
+      "project": "thomaspiche",
+      "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/thomaspiche",
+      "githubRepo": "https://github.com/vguyaux/sites/tree/main/thomaspiche",
+      "dev": "file:///Users/vincentguyaux/Documents/github/sites/thomaspiche/index.html",
+      "staging": "https://vguyaux.github.io/sites/thomaspiche/",
+      "prod": "https://thomaspiche.com"
+    },
+    {
+      "id": "tnc",
+      "workspace": "sites",
+      "company": "tnc",
+      "project": "tnc",
+      "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/tnc",
+      "githubRepo": "https://github.com/vguyaux/tncwebsite",
+      "dev": "file:///Users/vincentguyaux/Documents/github/sites/tnc/index.html",
+      "staging": "https://vguyaux.github.io/tncwebsite/",
+      "prod": "https://vguyaux.github.io/tncwebsite/"
+    }
+  ]
+}

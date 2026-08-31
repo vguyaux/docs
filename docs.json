@@ -1,34 +1,29 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mintlify Starter Kit",
+  "name": "Devsites",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#22C55E",
+    "light": "#11823B",
+    "dark": "#3CFF7E"
   },
   "favicon": "/favicon.svg",
   "navigation": {
     "pages": [
       {
-        "group": "Getting Started",
+        "group": "Database",
         "pages": [
           "index",
-          "quickstart"
+          "devsites/index"
         ]
       }
     ],
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "GitHub",
+          "href": "https://github.com/vguyaux/docs",
+          "icon": "github"
         }
       ]
     }
@@ -40,14 +35,14 @@
   "navbar": {
     "links": [
       {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "label": "Local repo",
+        "href": "file:///Users/vincentguyaux/Documents/github/sites/devsites"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://app.mintlify.com"
+      "label": "Open database",
+      "href": "/devsites/database.html"
     }
   },
   "contextual": {
@@ -64,9 +59,7 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "github": "https://github.com/vguyaux/docs"
     }
   }
 }

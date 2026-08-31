@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>devsites://database</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #e9ece6;
+      --panel: #f7f8f2;
+      --panel-2: #eef1e8;
+      --text: #172018;
+      --muted: #667063;
+      --line: #cbd4c4;
+      --green: #11823b;
+      --green-2: #22a354;
+      --red: #a63a3a;
+      --shadow: 0 20px 60px rgba(17, 24, 18, 0.11);
+      --radius: 18px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #090d0a;
+        --panel: #0e1510;
+        --panel-2: #101a13;
+        --text: #d8ffe3;
+        --muted: #7fa389;
+        --line: #203724;
+        --green: #3cff7e;
+        --green-2: #95ffb9;
+        --red: #ff6b6b;
+        --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, color-mix(in srgb, var(--green) 15%, transparent), transparent 36rem),
+        linear-gradient(180deg, var(--bg), color-mix(in srgb, var(--bg) 92%, #000 8%));
+      color: var(--text);
+      font-family: var(--mono);
+      letter-spacing: -0.02em;
+    }
+
+    a { color: var(--green); text-decoration: none; }
+    a:hover { color: var(--green-2); text-decoration: underline; }
+
+    .shell {
+      width: min(1420px, calc(100vw - 32px));
+      margin: 28px auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: color-mix(in srgb, var(--panel) 94%, transparent);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel-2);
+    }
+
+    .traffic { display: flex; gap: 8px; align-items: center; }
+    .dot { width: 11px; height: 11px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--line) 60%, #000); }
+    .dot.red { background: #ff5f57; }
+    .dot.yellow { background: #ffbd2e; }
+    .dot.green { background: #28c840; }
+
+    .path {
+      flex: 1;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 13px;
+    }
+
+    .status {
+      color: var(--green);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    main { padding: 24px; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: end;
+      margin-bottom: 24px;
+    }
+
+    h1, h2 { margin: 0; font-weight: 700; }
+    h1 { font-size: clamp(28px, 5vw, 56px); line-height: 0.95; }
+    h2 { font-size: 15px; color: var(--green); text-transform: uppercase; letter-spacing: 0.11em; }
+
+    .prompt { color: var(--green); }
+    .muted { color: var(--muted); }
+    .blink { animation: blink 1.2s steps(2, start) infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    button, .file-label {
+      appearance: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text);
+      font: 12px/1 var(--mono);
+      padding: 10px 13px;
+      cursor: pointer;
+      transition: 120ms ease;
+    }
+
+    button:hover, .file-label:hover {
+      border-color: var(--green);
+      color: var(--green);
+      transform: translateY(-1px);
+    }
+
+    button.danger:hover { border-color: var(--red); color: var(--red); }
+    input[type="file"] { display: none; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(220px, 0.8fr) minmax(220px, 0.8fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--panel) 88%, transparent);
+      overflow: hidden;
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--panel-2) 80%, transparent);
+    }
+
+    .card-head small { color: var(--muted); }
+
+    .table-wrap { width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 420px; }
+    .projects table { min-width: 1120px; }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 12px 14px;
+      text-align: left;
+      vertical-align: middle;
+      font-size: 13px;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      font-weight: 600;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+    tr:hover td { background: color-mix(in srgb, var(--green) 5%, transparent); }
+
+    input, select {
+      width: 100%;
+      min-width: 120px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text);
+      font: 13px/1.3 var(--mono);
+      padding: 8px 9px;
+      outline: none;
+    }
+
+    select {
+      border-color: var(--line);
+      background: var(--panel);
+      cursor: pointer;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--green);
+      background: var(--panel-2);
+    }
+
+    input.link-value { min-width: 210px; }
+
+    .link-cell {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .open {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    .open:hover { border-color: var(--green); text-decoration: none; }
+    .empty-link { color: var(--muted); font-size: 12px; }
+
+    .row-actions { display: flex; gap: 6px; }
+    .row-actions button { border-radius: 10px; padding: 8px 9px; }
+
+    .footnote {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 900px) {
+      .grid, .hero { grid-template-columns: 1fr; }
+      .toolbar { justify-content: flex-start; }
+      main { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="traffic" aria-hidden="true">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <div class="path">/Users/vincentguyaux/Documents/github/sites/devsites/devsites/database.html</div>
+      <div class="status">system theme</div>
+    </div>
+
+    <main>
+      <section class="hero">
+        <div>
+          <p class="muted"><span class="prompt">vg@devsites</span>:~$ open site_registry</p>
+          <h1>devsites<span class="prompt">://</span>database<span class="blink">_</span></h1>
+          <p class="muted">Minimal terminal registry for workspaces, companies, projects, and links.</p>
+        </div>
+        <div class="toolbar">
+          <button id="addWorkspace">+ workspace</button>
+          <button id="addCompany">+ company</button>
+          <button id="addProject">+ project</button>
+          <button id="exportData">export.json</button>
+          <label class="file-label" for="importData">import.json</label>
+          <input id="importData" type="file" accept="application/json" />
+          <button class="danger" id="resetData">reset</button>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <div class="card-head">
+            <h2>workspace</h2>
+            <small id="workspaceCount"></small>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>id</th><th>workspace</th><th></th></tr></thead>
+              <tbody id="workspaceRows"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <h2>company name</h2>
+            <small id="companyCount"></small>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>id</th><th>company</th><th></th></tr></thead>
+              <tbody id="companyRows"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section class="card projects">
+        <div class="card-head">
+          <h2>project</h2>
+          <small id="projectCount"></small>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>workspace</th>
+                <th>company</th>
+                <th>project</th>
+                <th>local repo</th>
+                <th>github repo</th>
+                <th>dev</th>
+                <th>staging</th>
+                <th>prod</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="projectRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="footnote">
+        Tip: links can be <code>https://</code>, <code>http://</code>, or <code>file://</code>. Changes save to this browser via <code>localStorage</code>. Use <strong>export.json</strong> when you want to commit the database to Git.
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "devsites.database.v1";
+
+    const seed = {
+      workspaces: [
+        { id: "sites", name: "Sites" }
+      ],
+      companies: [
+        { id: "brindang", name: "Brindang" },
+        { id: "deasil", name: "Deasil Group" },
+        { id: "evan", name: "Evan Luebbe" },
+        { id: "marco", name: "Marco Luna Wellness" },
+        { id: "mbg", name: "MBG Finance" },
+        { id: "pamelarasey", name: "Pamela Rasey" },
+        { id: "studio", name: "Studio Mock" },
+        { id: "thomaspiche", name: "Thomas Piche" },
+        { id: "tnc", name: "TNC" }
+      ],
+      projects: [
+        project("sites", "brindang", "brindang", "brindang", "", "https://vguyaux.github.io/sites/brindang/", "https://vguyaux.github.io/sites/brindang/"),
+        project("sites", "deasil", "deasil", "deasil", "file:///Users/vincentguyaux/Documents/github/sites/deasil/index.html", "https://vguyaux.github.io/sites/deasil/", "https://deasilgroup.com"),
+        project("sites", "evan", "evan", "evan", "file:///Users/vincentguyaux/Documents/github/sites/evan/index.html", "https://vguyaux.github.io/sites/evan/", "https://evanluebbe.com"),
+        project("sites", "evan", "evan-redirect", "evan-redirect", "file:///Users/vincentguyaux/Documents/github/sites/evan-redirect/wrangler.jsonc", "https://github.com/vguyaux/sites/tree/main/evan-redirect", "https://evanluebbe.com"),
+        project("sites", "marco", "marco-luna-wellness", "marco-luna-wellness", "file:///Users/vincentguyaux/Documents/github/sites/marco-luna-wellness/index.html", "https://vguyaux.github.io/sites/marco-luna-wellness/", "https://vguyaux.github.io/sites/marco-luna-wellness/"),
+        project("sites", "mbg", "mbg-finance", "mbg-finance", "", "https://vguyaux.github.io/sites/mbg-finance/", "https://vguyaux.github.io/sites/mbg-finance/"),
+        project("sites", "pamelarasey", "pamelarasey", "pamelarasey", "file:///Users/vincentguyaux/Documents/github/sites/pamelarasey/index.html", "https://vguyaux.github.io/pamelarasey/", "https://vguyaux.github.io/pamelarasey/", "https://github.com/vguyaux/pamelarasey"),
+        project("sites", "pamelarasey", "rasey-redirect", "rasey-redirect", "file:///Users/vincentguyaux/Documents/github/sites/rasey-redirect/wrangler.jsonc", "https://github.com/vguyaux/sites/tree/main/rasey-redirect", "https://github.com/vguyaux/sites/tree/main/rasey-redirect"),
+        project("sites", "studio", "studio-mock-1", "studio-mock-1", "", "https://vguyaux.github.io/sites/studio-mock-1/", "https://vguyaux.github.io/sites/studio-mock-1/"),
+        project("sites", "thomaspiche", "thomaspiche", "thomaspiche", "file:///Users/vincentguyaux/Documents/github/sites/thomaspiche/index.html", "https://vguyaux.github.io/sites/thomaspiche/", "https://thomaspiche.com"),
+        project("sites", "tnc", "tnc", "tnc", "file:///Users/vincentguyaux/Documents/github/sites/tnc/index.html", "https://vguyaux.github.io/tncwebsite/", "https://vguyaux.github.io/tncwebsite/", "https://github.com/vguyaux/tncwebsite")
+      ]
+    };
+
+    function project(workspace, company, name, dir, dev, staging, prod, github) {
+      return {
+        id: slug(name),
+        workspace,
+        company,
+        project: name,
+        localRepo: `file:///Users/vincentguyaux/Documents/github/sites/${dir}`,
+        githubRepo: github || `https://github.com/vguyaux/sites/tree/main/${dir}`,
+        dev,
+        staging,
+        prod
+      };
+    }
+
+    let db = load();
+
+    function load() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : clone(seed);
+      } catch (_) {
+        return clone(seed);
+      }
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(db, null, 2));
+      render();
+    }
+
+    function slug(value) {
+      return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "new";
+    }
+
+    function clone(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function uid(prefix) {
+      return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function esc(value = "") {
+      return String(value).replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
+    }
+
+    function options(items, selected) {
+      return items.map(item => `<option value="${esc(item.id)}" ${item.id === selected ? "selected" : ""}>${esc(item.name)}</option>`).join("");
+    }
+
+    function linkEditor(rowId, key, value) {
+      const safe = esc(value || "");
+      const open = value ? `<a class="open" href="${safe}" target="_blank" rel="noreferrer" title="Open ${key}">↗</a>` : `<span class="empty-link">--</span>`;
+      return `<div class="link-cell"><input class="link-value" data-row="${rowId}" data-field="${key}" value="${safe}" placeholder="paste link" />${open}</div>`;
+    }
+
+    function render() {
+      document.getElementById("workspaceCount").textContent = `${db.workspaces.length} rows`;
+      document.getElementById("companyCount").textContent = `${db.companies.length} rows`;
+      document.getElementById("projectCount").textContent = `${db.projects.length} rows`;
+
+      document.getElementById("workspaceRows").innerHTML = db.workspaces.map(item => `
+        <tr>
+          <td class="muted">${esc(item.id)}</td>
+          <td><input data-table="workspaces" data-id="${esc(item.id)}" data-field="name" value="${esc(item.name)}" /></td>
+          <td class="row-actions"><button class="danger" data-delete="workspaces" data-id="${esc(item.id)}">rm</button></td>
+        </tr>
+      `).join("");
+
+      document.getElementById("companyRows").innerHTML = db.companies.map(item => `
+        <tr>
+          <td class="muted">${esc(item.id)}</td>
+          <td><input data-table="companies" data-id="${esc(item.id)}" data-field="name" value="${esc(item.name)}" /></td>
+          <td class="row-actions"><button class="danger" data-delete="companies" data-id="${esc(item.id)}">rm</button></td>
+        </tr>
+      `).join("");
+
+      document.getElementById("projectRows").innerHTML = db.projects.map(row => `
+        <tr>
+          <td><select data-row="${esc(row.id)}" data-field="workspace">${options(db.workspaces, row.workspace)}</select></td>
+          <td><select data-row="${esc(row.id)}" data-field="company">${options(db.companies, row.company)}</select></td>
+          <td><input data-row="${esc(row.id)}" data-field="project" value="${esc(row.project)}" placeholder="project" /></td>
+          <td>${linkEditor(row.id, "localRepo", row.localRepo)}</td>
+          <td>${linkEditor(row.id, "githubRepo", row.githubRepo)}</td>
+          <td>${linkEditor(row.id, "dev", row.dev)}</td>
+          <td>${linkEditor(row.id, "staging", row.staging)}</td>
+          <td>${linkEditor(row.id, "prod", row.prod)}</td>
+          <td class="row-actions"><button class="danger" data-delete="projects" data-id="${esc(row.id)}">rm</button></td>
+        </tr>
+      `).join("");
+    }
+
+    document.addEventListener("input", event => {
+      const el = event.target;
+      if (el.dataset.table) {
+        const item = db[el.dataset.table].find(entry => entry.id === el.dataset.id);
+        if (item) item[el.dataset.field] = el.value;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(db, null, 2));
+      }
+      if (el.dataset.row) {
+        const row = db.projects.find(entry => entry.id === el.dataset.row);
+        if (row) row[el.dataset.field] = el.value;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(db, null, 2));
+      }
+    });
+
+    document.addEventListener("change", event => {
+      if (event.target.matches("select")) save();
+    });
+
+    document.addEventListener("blur", event => {
+      if (event.target.matches("input")) render();
+    }, true);
+
+    document.addEventListener("click", event => {
+      const button = event.target.closest("button");
+      if (!button) return;
+
+      if (button.id === "addWorkspace") {
+        const name = prompt("Workspace name", "New workspace");
+        if (!name) return;
+        db.workspaces.push({ id: slug(name), name });
+        save();
+      }
+
+      if (button.id === "addCompany") {
+        const name = prompt("Company name", "New company");
+        if (!name) return;
+        db.companies.push({ id: slug(name), name });
+        save();
+      }
+
+      if (button.id === "addProject") {
+        db.projects.push({
+          id: uid("project"),
+          workspace: db.workspaces[0]?.id || "",
+          company: db.companies[0]?.id || "",
+          project: "new-project",
+          localRepo: "",
+          githubRepo: "",
+          dev: "",
+          staging: "",
+          prod: ""
+        });
+        save();
+      }
+
+      if (button.id === "exportData") {
+        const blob = new Blob([JSON.stringify(db, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "devsites.database.json";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      if (button.id === "resetData") {
+        if (!confirm("Reset the browser database to the starter data?")) return;
+        db = clone(seed);
+        save();
+      }
+
+      if (button.dataset.delete) {
+        const table = button.dataset.delete;
+        if (!confirm(`Remove this ${table.slice(0, -1)}?`)) return;
+        db[table] = db[table].filter(item => item.id !== button.dataset.id);
+        save();
+      }
+    });
+
+    document.getElementById("importData").addEventListener("change", async event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        const imported = JSON.parse(await file.text());
+        if (!imported.workspaces || !imported.companies || !imported.projects) throw new Error("Invalid database shape");
+        db = imported;
+        save();
+      } catch (error) {
+        alert(`Import failed: ${error.message}`);
+      } finally {
+        event.target.value = "";
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>

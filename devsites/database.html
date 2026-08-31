@@ -46,6 +46,7 @@
         linear-gradient(180deg, var(--bg), color-mix(in srgb, var(--bg) 92%, #000 8%));
       color: var(--text);
       font-family: var(--mono);
+      font-size: 14px;
       letter-spacing: -0.02em;
     }
 
@@ -84,12 +85,12 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-size: 13px;
+      font-size: 11px;
     }
 
     .status {
       color: var(--green);
-      font-size: 12px;
+      font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
@@ -105,8 +106,8 @@
     }
 
     h1, h2 { margin: 0; font-weight: 700; }
-    h1 { font-size: clamp(28px, 5vw, 56px); line-height: 0.95; }
-    h2 { font-size: 15px; color: var(--green); text-transform: uppercase; letter-spacing: 0.11em; }
+    h1 { font-size: clamp(26px, 5vw, 54px); line-height: 0.95; }
+    h2 { font-size: 13px; color: var(--green); text-transform: uppercase; letter-spacing: 0.11em; }
 
     .prompt { color: var(--green); }
     .muted { color: var(--muted); }
@@ -126,8 +127,8 @@
       border-radius: 999px;
       background: transparent;
       color: var(--text);
-      font: 12px/1 var(--mono);
-      padding: 10px 13px;
+      font: 10px/1 var(--mono);
+      padding: 8px 11px;
       cursor: pointer;
       transition: 120ms ease;
     }
@@ -176,12 +177,12 @@
       padding: 12px 14px;
       text-align: left;
       vertical-align: middle;
-      font-size: 13px;
+      font-size: 11px;
     }
 
     th {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 9px;
       text-transform: uppercase;
       letter-spacing: 0.09em;
       font-weight: 600;
@@ -197,8 +198,8 @@
       border-radius: 10px;
       background: transparent;
       color: var(--text);
-      font: 13px/1.3 var(--mono);
-      padding: 8px 9px;
+      font: 11px/1.3 var(--mono);
+      padding: 7px 8px;
       outline: none;
     }
 
@@ -222,7 +223,7 @@
       align-items: center;
     }
 
-    .open {
+    .open-link {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -234,11 +235,11 @@
       text-decoration: none;
     }
 
-    .open:hover { border-color: var(--green); text-decoration: none; }
-    .empty-link { color: var(--muted); font-size: 12px; }
+    .open-link:hover { border-color: var(--green); text-decoration: none; }
+    .empty-link { color: var(--muted); font-size: 10px; }
 
     .row-actions { display: flex; gap: 6px; }
-    .row-actions button { border-radius: 10px; padding: 8px 9px; }
+    .row-actions button { border-radius: 10px; padding: 7px 8px; }
 
     .footnote {
       margin-top: 18px;
@@ -246,9 +247,51 @@
       border: 1px dashed var(--line);
       border-radius: 14px;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 10px;
       line-height: 1.6;
     }
+
+    .modal[hidden] { display: none; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background: color-mix(in srgb, #000 58%, transparent);
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-card {
+      width: min(760px, 100%);
+      max-height: calc(100vh - 32px);
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .modal-head,
+    .modal-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel-2);
+    }
+
+    .modal-actions { border-top: 1px solid var(--line); border-bottom: 0; justify-content: flex-end; }
+    .modal-title { color: var(--green); font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px; }
+    .form-field { display: grid; gap: 6px; }
+    .form-field.wide { grid-column: 1 / -1; }
+    .form-field label { color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: 0.09em; }
+    .form-link { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
 
     @media (max-width: 900px) {
       .grid, .hero { grid-template-columns: 1fr; }
@@ -346,52 +389,587 @@
     </main>
   </div>
 
+  <div class="modal" id="projectModal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="projectModalTitle">project form</div>
+          <div class="muted" id="projectModalPath"></div>
+        </div>
+        <button id="closeProjectForm" type="button">esc</button>
+      </div>
+      <div class="form-grid" id="projectFormFields"></div>
+      <div class="modal-actions">
+        <button id="saveProjectForm" type="button">save + close</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const STORAGE_KEY = "devsites.database.v1";
+    const STORAGE_KEY = "devsites.database.v2";
 
     const seed = {
-      workspaces: [
-        { id: "sites", name: "Sites" }
+      "workspaces": [
+            {
+                  "id": "sites",
+                  "name": "Sites"
+            },
+            {
+                  "id": "github",
+                  "name": "GitHub repos"
+            }
       ],
-      companies: [
-        { id: "brindang", name: "Brindang" },
-        { id: "deasil", name: "Deasil Group" },
-        { id: "evan", name: "Evan Luebbe" },
-        { id: "marco", name: "Marco Luna Wellness" },
-        { id: "mbg", name: "MBG Finance" },
-        { id: "pamelarasey", name: "Pamela Rasey" },
-        { id: "studio", name: "Studio Mock" },
-        { id: "thomaspiche", name: "Thomas Piche" },
-        { id: "tnc", name: "TNC" }
+      "companies": [
+            {
+                  "id": "brindang",
+                  "name": "Brindang"
+            },
+            {
+                  "id": "deasil",
+                  "name": "Deasil Group"
+            },
+            {
+                  "id": "evan",
+                  "name": "Evan Luebbe"
+            },
+            {
+                  "id": "marco",
+                  "name": "Marco Luna Wellness"
+            },
+            {
+                  "id": "mbg",
+                  "name": "MBG Finance"
+            },
+            {
+                  "id": "pamelarasey",
+                  "name": "Pamela Rasey"
+            },
+            {
+                  "id": "studio",
+                  "name": "Studio Mock"
+            },
+            {
+                  "id": "thomaspiche",
+                  "name": "Thomas Piche"
+            },
+            {
+                  "id": "tnc",
+                  "name": "TNC"
+            },
+            {
+                  "id": "vguyaux",
+                  "name": "vguyaux"
+            }
       ],
-      projects: [
-        project("sites", "brindang", "brindang", "brindang", "", "https://vguyaux.github.io/sites/brindang/", "https://vguyaux.github.io/sites/brindang/"),
-        project("sites", "deasil", "deasil", "deasil", "file:///Users/vincentguyaux/Documents/github/sites/deasil/index.html", "https://vguyaux.github.io/sites/deasil/", "https://deasilgroup.com"),
-        project("sites", "evan", "evan", "evan", "file:///Users/vincentguyaux/Documents/github/sites/evan/index.html", "https://vguyaux.github.io/sites/evan/", "https://evanluebbe.com"),
-        project("sites", "evan", "evan-redirect", "evan-redirect", "file:///Users/vincentguyaux/Documents/github/sites/evan-redirect/wrangler.jsonc", "https://github.com/vguyaux/sites/tree/main/evan-redirect", "https://evanluebbe.com"),
-        project("sites", "marco", "marco-luna-wellness", "marco-luna-wellness", "file:///Users/vincentguyaux/Documents/github/sites/marco-luna-wellness/index.html", "https://vguyaux.github.io/sites/marco-luna-wellness/", "https://vguyaux.github.io/sites/marco-luna-wellness/"),
-        project("sites", "mbg", "mbg-finance", "mbg-finance", "", "https://vguyaux.github.io/sites/mbg-finance/", "https://vguyaux.github.io/sites/mbg-finance/"),
-        project("sites", "pamelarasey", "pamelarasey", "pamelarasey", "file:///Users/vincentguyaux/Documents/github/sites/pamelarasey/index.html", "https://vguyaux.github.io/pamelarasey/", "https://vguyaux.github.io/pamelarasey/", "https://github.com/vguyaux/pamelarasey"),
-        project("sites", "pamelarasey", "rasey-redirect", "rasey-redirect", "file:///Users/vincentguyaux/Documents/github/sites/rasey-redirect/wrangler.jsonc", "https://github.com/vguyaux/sites/tree/main/rasey-redirect", "https://github.com/vguyaux/sites/tree/main/rasey-redirect"),
-        project("sites", "studio", "studio-mock-1", "studio-mock-1", "", "https://vguyaux.github.io/sites/studio-mock-1/", "https://vguyaux.github.io/sites/studio-mock-1/"),
-        project("sites", "thomaspiche", "thomaspiche", "thomaspiche", "file:///Users/vincentguyaux/Documents/github/sites/thomaspiche/index.html", "https://vguyaux.github.io/sites/thomaspiche/", "https://thomaspiche.com"),
-        project("sites", "tnc", "tnc", "tnc", "file:///Users/vincentguyaux/Documents/github/sites/tnc/index.html", "https://vguyaux.github.io/tncwebsite/", "https://vguyaux.github.io/tncwebsite/", "https://github.com/vguyaux/tncwebsite")
+      "projects": [
+            {
+                  "id": "brindang",
+                  "workspace": "sites",
+                  "company": "brindang",
+                  "project": "brindang",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/brindang",
+                  "githubRepo": "https://github.com/vguyaux/sites/tree/main/brindang",
+                  "dev": "",
+                  "staging": "https://vguyaux.github.io/sites/brindang/",
+                  "prod": "https://vguyaux.github.io/sites/brindang/"
+            },
+            {
+                  "id": "deasil",
+                  "workspace": "sites",
+                  "company": "deasil",
+                  "project": "deasil",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/deasil",
+                  "githubRepo": "https://github.com/vguyaux/sites/tree/main/deasil",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/sites/deasil/index.html",
+                  "staging": "https://vguyaux.github.io/sites/deasil/",
+                  "prod": "https://deasilgroup.com"
+            },
+            {
+                  "id": "evan",
+                  "workspace": "sites",
+                  "company": "evan",
+                  "project": "evan",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/evan",
+                  "githubRepo": "https://github.com/vguyaux/sites/tree/main/evan",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/sites/evan/index.html",
+                  "staging": "https://vguyaux.github.io/sites/evan/",
+                  "prod": "https://evanluebbe.com"
+            },
+            {
+                  "id": "evan-redirect",
+                  "workspace": "sites",
+                  "company": "evan",
+                  "project": "evan-redirect",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/evan-redirect",
+                  "githubRepo": "https://github.com/vguyaux/sites/tree/main/evan-redirect",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/sites/evan-redirect/wrangler.jsonc",
+                  "staging": "https://github.com/vguyaux/sites/tree/main/evan-redirect",
+                  "prod": "https://evanluebbe.com"
+            },
+            {
+                  "id": "marco-luna-wellness",
+                  "workspace": "sites",
+                  "company": "marco",
+                  "project": "marco-luna-wellness",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/marco-luna-wellness",
+                  "githubRepo": "https://github.com/vguyaux/sites/tree/main/marco-luna-wellness",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/sites/marco-luna-wellness/index.html",
+                  "staging": "https://vguyaux.github.io/sites/marco-luna-wellness/",
+                  "prod": "https://vguyaux.github.io/sites/marco-luna-wellness/"
+            },
+            {
+                  "id": "mbg-finance",
+                  "workspace": "sites",
+                  "company": "mbg",
+                  "project": "mbg-finance",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/mbg-finance",
+                  "githubRepo": "https://github.com/vguyaux/sites/tree/main/mbg-finance",
+                  "dev": "",
+                  "staging": "https://vguyaux.github.io/sites/mbg-finance/",
+                  "prod": "https://vguyaux.github.io/sites/mbg-finance/"
+            },
+            {
+                  "id": "pamelarasey",
+                  "workspace": "sites",
+                  "company": "pamelarasey",
+                  "project": "pamelarasey",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/pamelarasey",
+                  "githubRepo": "https://github.com/vguyaux/pamelarasey",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/sites/pamelarasey/index.html",
+                  "staging": "https://vguyaux.github.io/pamelarasey/",
+                  "prod": "https://vguyaux.github.io/pamelarasey/"
+            },
+            {
+                  "id": "rasey-redirect",
+                  "workspace": "sites",
+                  "company": "pamelarasey",
+                  "project": "rasey-redirect",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/rasey-redirect",
+                  "githubRepo": "https://github.com/vguyaux/sites/tree/main/rasey-redirect",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/sites/rasey-redirect/wrangler.jsonc",
+                  "staging": "https://github.com/vguyaux/sites/tree/main/rasey-redirect",
+                  "prod": "https://github.com/vguyaux/sites/tree/main/rasey-redirect"
+            },
+            {
+                  "id": "studio-mock-1",
+                  "workspace": "sites",
+                  "company": "studio",
+                  "project": "studio-mock-1",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/studio-mock-1",
+                  "githubRepo": "https://github.com/vguyaux/sites/tree/main/studio-mock-1",
+                  "dev": "",
+                  "staging": "https://vguyaux.github.io/sites/studio-mock-1/",
+                  "prod": "https://vguyaux.github.io/sites/studio-mock-1/"
+            },
+            {
+                  "id": "thomaspiche",
+                  "workspace": "sites",
+                  "company": "thomaspiche",
+                  "project": "thomaspiche",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/thomaspiche",
+                  "githubRepo": "https://github.com/vguyaux/sites/tree/main/thomaspiche",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/sites/thomaspiche/index.html",
+                  "staging": "https://vguyaux.github.io/sites/thomaspiche/",
+                  "prod": "https://thomaspiche.com"
+            },
+            {
+                  "id": "tnc",
+                  "workspace": "sites",
+                  "company": "tnc",
+                  "project": "tnc",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/tnc",
+                  "githubRepo": "https://github.com/vguyaux/tncwebsite",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/sites/tnc/index.html",
+                  "staging": "https://vguyaux.github.io/tncwebsite/",
+                  "prod": "https://vguyaux.github.io/tncwebsite/"
+            },
+            {
+                  "id": "repo-alicia-and-plants",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "alicia-and-plants",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/claude-workspaces/Alicia%20and%20Plants/Alicia%20&%20Plants",
+                  "githubRepo": "https://github.com/vguyaux/alicia-and-plants",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/claude-workspaces/Alicia%20and%20Plants/Alicia%20&%20Plants/index.html",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-back-and-forth",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "back-and-forth",
+                  "localRepo": "",
+                  "githubRepo": "https://github.com/vguyaux/back-and-forth",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-body-station-app",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "body-station-app",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/body-station-app",
+                  "githubRepo": "https://github.com/vguyaux/body-station-app",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-body-station-hub",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "body-station-hub",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/body-station-hub",
+                  "githubRepo": "https://github.com/vguyaux/body-station-hub",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/body-station-hub/index.html",
+                  "staging": "https://vguyaux.github.io/body-station-hub/",
+                  "prod": "https://vguyaux.github.io/body-station-hub/"
+            },
+            {
+                  "id": "repo-claude-workspaces",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "claude-workspaces",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/claude-workspaces",
+                  "githubRepo": "https://github.com/vguyaux/claude-workspaces",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-cpm",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "cpm",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/cpm",
+                  "githubRepo": "https://github.com/vguyaux/cpm",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-docs",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "docs",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/devsites",
+                  "githubRepo": "https://github.com/vguyaux/docs",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/sites/devsites/README.md",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-fcigohighlevel",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "fcigohighlevel",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/fcigohighlevel",
+                  "githubRepo": "https://github.com/vguyaux/fcigohighlevel",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-first-brain",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "first-brain",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/first-brain",
+                  "githubRepo": "https://github.com/vguyaux/first-brain",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-firstmate-backup",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "firstmate-backup",
+                  "localRepo": "",
+                  "githubRepo": "https://github.com/vguyaux/firstmate-backup",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-fork-fci-knowledge-base",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "fork-fci-knowledge-base",
+                  "localRepo": "",
+                  "githubRepo": "https://github.com/vguyaux/fork-fci-knowledge-base",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-fork-fci-marketing",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "fork-fci-marketing",
+                  "localRepo": "",
+                  "githubRepo": "https://github.com/vguyaux/fork-fci-marketing",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-fork-fci-website",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "fork-fci-website",
+                  "localRepo": "",
+                  "githubRepo": "https://github.com/vguyaux/fork-fci-website",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-goodness-ui-system",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "goodness-ui-system",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/goodness-ui-system",
+                  "githubRepo": "https://github.com/vguyaux/goodness-ui-system",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-hermes-state",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "hermes-state",
+                  "localRepo": "",
+                  "githubRepo": "https://github.com/vguyaux/hermes-state",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-iddadvisor",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "Iddadvisor",
+                  "localRepo": "",
+                  "githubRepo": "https://github.com/vguyaux/Iddadvisor",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-infrastructure",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "infrastructure",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/infrastructure",
+                  "githubRepo": "https://github.com/vguyaux/infrastructure",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/infrastructure/README.md",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-michaelapyle",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "michaelapyle",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/michaelapyle",
+                  "githubRepo": "https://github.com/vguyaux/michaelapyle",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/michaelapyle/index.html",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-mockument",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "mockument",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/mockument",
+                  "githubRepo": "https://github.com/vguyaux/mockument",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/mockument/index.html",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-mockument-demo",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "mockument-demo",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/mockument-demo",
+                  "githubRepo": "https://github.com/vguyaux/mockument-demo",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/mockument-demo/index.html",
+                  "staging": "https://vguyaux.github.io/mockument-demo/",
+                  "prod": "https://vguyaux.github.io/mockument-demo/"
+            },
+            {
+                  "id": "repo-nesens",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "nesens",
+                  "localRepo": "",
+                  "githubRepo": "https://github.com/vguyaux/nesens",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-nesens-hub",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "nesens-hub",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/nesens-hub",
+                  "githubRepo": "https://github.com/vguyaux/nesens-hub",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/nesens-hub/README.md",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-northbook",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "northbook",
+                  "localRepo": "",
+                  "githubRepo": "https://github.com/vguyaux/northbook",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-open-vrm-app-2-0",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "open-vrm-app-2.0",
+                  "localRepo": "",
+                  "githubRepo": "https://github.com/vguyaux/open-vrm-app-2.0",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-open-vrm-website",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "open-vrm-website",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/open-vrm-website",
+                  "githubRepo": "https://github.com/vguyaux/open-vrm-website",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/open-vrm-website/README.md",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-pamelarasey",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "pamelarasey",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/pamelarasey",
+                  "githubRepo": "https://github.com/vguyaux/pamelarasey",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/sites/pamelarasey/index.html",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-pm-hub",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "pm-hub",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/pm-hub",
+                  "githubRepo": "https://github.com/vguyaux/pm-hub",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-policymatch",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "policymatch",
+                  "localRepo": "",
+                  "githubRepo": "https://github.com/vguyaux/policymatch",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-quiet-wealth",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "quiet-wealth",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/quiet-wealth",
+                  "githubRepo": "https://github.com/vguyaux/quiet-wealth",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-secondbrain",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "secondbrain",
+                  "localRepo": "",
+                  "githubRepo": "https://github.com/vguyaux/secondbrain",
+                  "dev": "",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-segouro-hub",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "segouro-hub",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/segouro-hub",
+                  "githubRepo": "https://github.com/vguyaux/segouro-hub",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/segouro-hub/index.html",
+                  "staging": "https://vguyaux.github.io/segouro-hub/",
+                  "prod": "https://vguyaux.github.io/segouro-hub/"
+            },
+            {
+                  "id": "repo-sites",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "sites",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/sites",
+                  "githubRepo": "https://github.com/vguyaux/sites",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/sites/README.md",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-tncwebsite",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "tncwebsite",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/sites/tnc",
+                  "githubRepo": "https://github.com/vguyaux/tncwebsite",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/sites/tnc/index.html",
+                  "staging": "",
+                  "prod": ""
+            },
+            {
+                  "id": "repo-vavoom-hub",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "vavoom-hub",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/vavoom-hub",
+                  "githubRepo": "https://github.com/vguyaux/vavoom-hub",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/vavoom-hub/index.html",
+                  "staging": "https://vguyaux.github.io/vavoom-hub/",
+                  "prod": "https://vguyaux.github.io/vavoom-hub/"
+            },
+            {
+                  "id": "repo-vive-om",
+                  "workspace": "github",
+                  "company": "vguyaux",
+                  "project": "vive-om",
+                  "localRepo": "file:///Users/vincentguyaux/Documents/github/vive-om",
+                  "githubRepo": "https://github.com/vguyaux/vive-om",
+                  "dev": "file:///Users/vincentguyaux/Documents/github/vive-om/index.html",
+                  "staging": "",
+                  "prod": ""
+            }
       ]
-    };
-
-    function project(workspace, company, name, dir, dev, staging, prod, github) {
-      return {
-        id: slug(name),
-        workspace,
-        company,
-        project: name,
-        localRepo: `file:///Users/vincentguyaux/Documents/github/sites/${dir}`,
-        githubRepo: github || `https://github.com/vguyaux/sites/tree/main/${dir}`,
-        dev,
-        staging,
-        prod
-      };
-    }
+};
 
     let db = load();
 
@@ -431,8 +1009,41 @@
 
     function linkEditor(rowId, key, value) {
       const safe = esc(value || "");
-      const open = value ? `<a class="open" href="${safe}" target="_blank" rel="noreferrer" title="Open ${key}">↗</a>` : `<span class="empty-link">--</span>`;
+      const open = value ? `<a class="open-link" href="${safe}" target="_blank" rel="noreferrer" title="Open ${key}">↗</a>` : `<span class="empty-link">--</span>`;
       return `<div class="link-cell"><input class="link-value" data-row="${rowId}" data-field="${key}" value="${safe}" placeholder="paste link" />${open}</div>`;
+    }
+
+    function formLink(row, key, label) {
+      const value = esc(row[key] || "");
+      const open = row[key] ? `<a class="open-link" href="${value}" target="_blank" rel="noreferrer" title="Open ${label}">↗</a>` : `<span class="empty-link">--</span>`;
+      return `<div class="form-field wide"><label>${label}</label><div class="form-link"><input data-form-field="${key}" value="${value}" placeholder="paste ${label}" />${open}</div></div>`;
+    }
+
+    function openProjectForm(id) {
+      const row = db.projects.find(entry => entry.id === id);
+      if (!row) return;
+      const modal = document.getElementById("projectModal");
+      document.getElementById("projectModalTitle").textContent = `project form: ${row.project || row.id}`;
+      document.getElementById("projectModalPath").textContent = row.githubRepo || row.localRepo || row.id;
+      document.getElementById("projectFormFields").innerHTML = `
+        <div class="form-field"><label>workspace</label><select data-form-field="workspace">${options(db.workspaces, row.workspace)}</select></div>
+        <div class="form-field"><label>company</label><select data-form-field="company">${options(db.companies, row.company)}</select></div>
+        <div class="form-field wide"><label>project</label><input data-form-field="project" value="${esc(row.project)}" placeholder="project" /></div>
+        ${formLink(row, "localRepo", "local repo")}
+        ${formLink(row, "githubRepo", "github repo")}
+        ${formLink(row, "dev", "dev")}
+        ${formLink(row, "staging", "staging")}
+        ${formLink(row, "prod", "prod")}
+      `;
+      modal.dataset.row = id;
+      modal.hidden = false;
+    }
+
+    function closeProjectForm() {
+      const modal = document.getElementById("projectModal");
+      modal.hidden = true;
+      modal.dataset.row = "";
+      render();
     }
 
     function render() {
@@ -466,7 +1077,7 @@
           <td>${linkEditor(row.id, "dev", row.dev)}</td>
           <td>${linkEditor(row.id, "staging", row.staging)}</td>
           <td>${linkEditor(row.id, "prod", row.prod)}</td>
-          <td class="row-actions"><button class="danger" data-delete="projects" data-id="${esc(row.id)}">rm</button></td>
+          <td class="row-actions"><button data-form="${esc(row.id)}">form</button><button class="danger" data-delete="projects" data-id="${esc(row.id)}">rm</button></td>
         </tr>
       `).join("");
     }
@@ -496,6 +1107,14 @@
     document.addEventListener("click", event => {
       const button = event.target.closest("button");
       if (!button) return;
+
+      if (button.dataset.form) {
+        openProjectForm(button.dataset.form);
+      }
+
+      if (button.id === "closeProjectForm" || button.id === "saveProjectForm") {
+        closeProjectForm();
+      }
 
       if (button.id === "addWorkspace") {
         const name = prompt("Workspace name", "New workspace");
@@ -548,6 +1167,32 @@
         db[table] = db[table].filter(item => item.id !== button.dataset.id);
         save();
       }
+    });
+
+    document.getElementById("projectFormFields").addEventListener("input", event => {
+      const field = event.target.dataset.formField;
+      const id = document.getElementById("projectModal").dataset.row;
+      const row = db.projects.find(entry => entry.id === id);
+      if (!field || !row) return;
+      row[field] = event.target.value;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(db, null, 2));
+    });
+
+    document.getElementById("projectFormFields").addEventListener("change", event => {
+      const field = event.target.dataset.formField;
+      const id = document.getElementById("projectModal").dataset.row;
+      const row = db.projects.find(entry => entry.id === id);
+      if (!field || !row) return;
+      row[field] = event.target.value;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(db, null, 2));
+    });
+
+    document.getElementById("projectModal").addEventListener("click", event => {
+      if (event.target.id === "projectModal") closeProjectForm();
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && !document.getElementById("projectModal").hidden) closeProjectForm();
     });
 
     document.getElementById("importData").addEventListener("change", async event => {
